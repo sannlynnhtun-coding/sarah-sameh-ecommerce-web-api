@@ -79,8 +79,8 @@ public class Program
             swagger.SwaggerDoc("v1", new OpenApiInfo
             {
                 Version = "v1",
-                Title = "E-Commerce",
-                Description = " ITI Projrcy"
+                Title = "Sarah Sameh E-Commerce Web API",
+                Description = "C# .NET 8 ASP.NET Core Web API"
             });
             // To Enable authorization using Swagger (JWT)    
             swagger.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme()
