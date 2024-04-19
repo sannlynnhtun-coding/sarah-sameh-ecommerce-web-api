@@ -94,7 +94,7 @@ public class WishlistController : ControllerBase
         }
         var wishLists = _wishlistRepository.GetAll()
             .Where(wishList => wishList.Customer.UserName == username)
-            .Select(wishList => new WishlistDtOs
+            .Select(wishList => new WishlistDtos
             {
                 CustomerId = wishList.CustomerId,
                 ProductName = wishList.Product.Name,

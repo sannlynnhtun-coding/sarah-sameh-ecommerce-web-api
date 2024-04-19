@@ -20,8 +20,8 @@ public class CategoryController : ControllerBase
     public ActionResult<GeneralResponse> GetAllCategory()
     {
         List<Models.Category> categories = _categoryRepository.GetAll();
-        List<CategoryWithProduct> categoriesWithProduct = categories.Select(category =>
-            new CategoryWithProduct
+        List<CategoryWithProductDto> categoriesWithProduct = categories.Select(category =>
+            new CategoryWithProductDto
             {
                 Id = category.Id,
                 CategoryName = category.Name,
@@ -53,7 +53,7 @@ public class CategoryController : ControllerBase
             return localResponse;
         }
 
-        var categoryWithProducts = new CategoryWithProduct
+        var categoryWithProducts = new CategoryWithProductDto
         {
             Id = category.Id,
             CategoryName = category.Name,
