@@ -1,6 +1,6 @@
 ﻿namespace WebApplication1.DTO
 {
-    public class PaymentDTO
+    public class PaymentDto
     {
         public int Id { get; set; }
         public DateTime Date { get; set; }

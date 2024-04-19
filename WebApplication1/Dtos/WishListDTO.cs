@@ -1,9 +1,9 @@
 ﻿namespace WebApplication1.DTO
 {
-    public class WishListDTO
+    public class WishListDto
     {
         public int Id { get; set; }
-        public int Product_Id { get; set; }
+        public int ProductId { get; set; }
 
 
     }
