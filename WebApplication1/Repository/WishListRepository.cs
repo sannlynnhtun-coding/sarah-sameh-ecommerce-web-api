@@ -5,35 +5,35 @@ namespace WebApplication1.Repository
 {
     public class WishListRepository : IWishListRepository
     {
-        Context context;
+        Context _context;
 
         // inject Context
-        public WishListRepository(Context _context)//ask context not create 
+        public WishListRepository(Context context)//ask context not create 
         {
-            context = _context;
+            this._context = context;
         }
         public List<WishList> GetAll()
         {
-            return context.wishLists
-                .Include(p => p.customer)
-                .Include(p => p.product)
+            return _context.WishLists
+                .Include(p => p.Customer)
+                .Include(p => p.Product)
                 .ToList();
         }
 
         public WishList GetById(int id)
         {
-            return context.wishLists
-                .Include(p => p.product)
-                .Include(p => p.customer)
+            return _context.WishLists
+                .Include(p => p.Product)
+                .Include(p => p.Customer)
                 .FirstOrDefault(p => p.Id == id);
         }
         public void Insert(WishList obj)
         {
-            context.Add(obj);
+            _context.Add(obj);
         }
         public void Update(WishList obj)
         {
-            context.Update(obj);
+            _context.Update(obj);
         }
 
         public void Delete(int id)
@@ -46,12 +46,12 @@ namespace WebApplication1.Repository
 
         public void Save()
         {
-            context.SaveChanges();
+            _context.SaveChanges();
         }
         public List<WishList> GetAllbyCustomerId(string id)
         {
-            List<WishList> wishLists = context.wishLists.
-                Where(item => item.Customer_Id == id && item.IsDeleted == false).ToList();
+            List<WishList> wishLists = _context.WishLists.
+                Where(item => item.CustomerId == id && item.IsDeleted == false).ToList();
             return wishLists;
         }
 

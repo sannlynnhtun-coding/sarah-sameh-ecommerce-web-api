@@ -5,42 +5,42 @@ namespace WebApplication1.Repository
 {
     public class CategoryRepository : ICategoryRepository
     {
-        Context context;
+        Context _context;
 
         // inject Context
-        public CategoryRepository(Context _context)//ask context not create 
+        public CategoryRepository(Context context)//ask context not create 
         {
-            context = _context;
+            this._context = context;
         }
         public List<Category> GetAll()
         {
-            return context.categories.Include(c => c.products).ToList();
+            return _context.Categories.Include(c => c.Products).ToList();
         }
 
         public Category GetById(int id)
         {
-            return context.categories
-                 .Include(c => c.products)
+            return _context.Categories
+                 .Include(c => c.Products)
                 .FirstOrDefault(p => p.Id == id);
         }
         public void Insert(Category obj)
         {
-            context.Add(obj);
+            _context.Add(obj);
         }
         public void Update(Category obj)
         {
-            context.Update(obj);
+            _context.Update(obj);
         }
 
         public void Delete(int id)
         {
             Category crs = GetById(id);
-            context.Remove(crs);
+            _context.Remove(crs);
         }
 
         public void Save()
         {
-            context.SaveChanges();
+            _context.SaveChanges();
         }
     }
 }

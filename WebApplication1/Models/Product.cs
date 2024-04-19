@@ -8,12 +8,12 @@ namespace WebApplication1.Models
         public string Name { get; set; }
         public int Price { get; set; }
         public string Description { get; set; }
-        public List<Cart>? carts { get; set; }
-        public List<WishList>? wishLists { get; set; }
+        public List<Cart>? Carts { get; set; }
+        public List<WishList>? WishLists { get; set; }
 
         [ForeignKey("category")]
-        public int? Category_Id { get; set; }
+        public int? CategoryId { get; set; }
 
-        public Category? category { set; get; }
+        public Category? Category { set; get; }
     }
 }

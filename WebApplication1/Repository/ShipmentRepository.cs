@@ -5,42 +5,42 @@ namespace WebApplication1.Repository
 {
     public class ShipmentRepository : IShipmentRepository
     {
-        Context context;
+        Context _context;
 
         // inject Context
-        public ShipmentRepository(Context _context)
+        public ShipmentRepository(Context context)
         {
-            context = _context;
+            this._context = context;
         }
         public List<Shipment> GetAll()
         {
-            return context.shipments.Include(s => s.customer).ToList();
+            return _context.Shipments.Include(s => s.Customer).ToList();
         }
 
         public Shipment GetById(int id)
         {
-            return context.shipments
+            return _context.Shipments
 
                 .FirstOrDefault(p => p.Id == id);
         }
         public void Insert(Shipment obj)
         {
-            context.Add(obj);
+            _context.Add(obj);
         }
         public void Update(Shipment obj)
         {
-            context.Update(obj);
+            _context.Update(obj);
         }
 
         public void Delete(int id)
         {
             Shipment crs = GetById(id);
-            context.Remove(crs);
+            _context.Remove(crs);
         }
 
         public void Save()
         {
-            context.SaveChanges();
+            _context.SaveChanges();
         }
     }
 }

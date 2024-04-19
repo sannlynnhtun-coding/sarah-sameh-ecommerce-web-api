@@ -5,13 +5,13 @@ namespace WebApplication1.Models
 {
     public class Context : IdentityDbContext<ApplicationUser>
     {
-        public DbSet<Product> products { set; get; }
-        public DbSet<Category> categories { set; get; }
-        public DbSet<Shipment> shipments { set; get; }
-        public DbSet<Payment> payments { set; get; }
-        public DbSet<Cart> carts { set; get; }
+        public DbSet<Product> Products { set; get; }
+        public DbSet<Category> Categories { set; get; }
+        public DbSet<Shipment> Shipments { set; get; }
+        public DbSet<Payment> Payments { set; get; }
+        public DbSet<Cart> Carts { set; get; }
 
-        public DbSet<WishList> wishLists { set; get; }
+        public DbSet<WishList> WishLists { set; get; }
         public Context() : base()
         {
 

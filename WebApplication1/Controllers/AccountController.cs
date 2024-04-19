@@ -4,7 +4,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using WebApplication1.DTO;
+using WebApplication1.Dtos;
 using WebApplication1.Models;
 
 namespace WebApplication1.Controllers
@@ -13,17 +13,17 @@ namespace WebApplication1.Controllers
     [ApiController]
     public class AccountController : ControllerBase
     {
-        private readonly UserManager<ApplicationUser> userManager;
-        private readonly IConfiguration config;
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IConfiguration _config;
 
         public AccountController(UserManager<ApplicationUser> userManager, IConfiguration config)
         {
-            this.userManager = userManager;
-            this.config = config;
+            this._userManager = userManager;
+            this._config = config;
         }
 
         [HttpPost("register")] //api/account/register
-        public async Task<IActionResult> Register(RegisterUserDTO userDto)
+        public async Task<IActionResult> Register(RegisterUserDto userDto)
         {
             if (ModelState.IsValid)
             {
@@ -35,7 +35,7 @@ namespace WebApplication1.Controllers
                     PasswordHash = userDto.Password
                 };
                 //create account in db
-                IdentityResult result = await userManager.CreateAsync(appuser, userDto.Password);
+                IdentityResult result = await _userManager.CreateAsync(appuser, userDto.Password);
                 if (result.Succeeded)
                 {
                     return Ok("Account Created");
@@ -48,46 +48,46 @@ namespace WebApplication1.Controllers
 
 
         [HttpPost("login")] //api/account/login
-        public async Task<IActionResult> Login(LoginUserDTO userDTO)
+        public async Task<IActionResult> Login(LoginUserDto userDto)
         {
             if (ModelState.IsValid)
             {
                 //return null not Found or AppUser if Found 
-                ApplicationUser? userFromDB = await userManager.FindByNameAsync(userDTO.UserName);
+                ApplicationUser? userFromDb = await _userManager.FindByNameAsync(userDto.UserName);
 
-                if (userFromDB != null)
+                if (userFromDb != null)
                 {
                     //found in db
                     //check pass
 
-                    bool found = await userManager.CheckPasswordAsync(userFromDB, userDTO.Password);
+                    bool found = await _userManager.CheckPasswordAsync(userFromDb, userDto.Password);
 
                     if (found)
                     {
                         //create token
 
                         List<Claim> myclaim = new List<Claim>();
-                        myclaim.Add(new Claim(ClaimTypes.Name, userFromDB.UserName));
-                        myclaim.Add(new Claim(ClaimTypes.NameIdentifier, userFromDB.Id));
+                        myclaim.Add(new Claim(ClaimTypes.Name, userFromDb.UserName));
+                        myclaim.Add(new Claim(ClaimTypes.NameIdentifier, userFromDb.Id));
                         myclaim.Add(new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())); //jti ==> Token id
 
 
-                        var roles = await userManager.GetRolesAsync(userFromDB);
+                        var roles = await _userManager.GetRolesAsync(userFromDb);
                         foreach (var role in roles)
                         {
                             myclaim.Add(new Claim(ClaimTypes.Role, role));
                         }
 
 
-                        var signKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["JWT:SecritKey"])); //"ssssssssssssssssssssssssssssssssssssssssssssssssssssss"
+                        var signKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["JWT:SecritKey"])); //"ssssssssssssssssssssssssssssssssssssssssssssssssssssss"
 
                         SigningCredentials signingCredentials =
                             new SigningCredentials(signKey, SecurityAlgorithms.HmacSha256);
 
 
                         JwtSecurityToken myToken = new JwtSecurityToken(
-                            issuer: config["JWT:ValidIss"],
-                            audience: config["JWT:ValidAud"],
+                            issuer: _config["JWT:ValidIss"],
+                            audience: _config["JWT:ValidAud"],
                             expires: DateTime.Now.AddHours(1),
                             claims: myclaim,
                             signingCredentials: signingCredentials

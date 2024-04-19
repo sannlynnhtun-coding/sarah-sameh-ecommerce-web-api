@@ -10,11 +10,11 @@ namespace WebApplication1.Models
         public string City { get; set; }
         public string State { get; set; }
         public string Country { get; set; }
-        public string Zip_Code { get; set; }
+        public string ZipCode { get; set; }
         public bool IsDeleted { get; set; } = false;
         [ForeignKey("customer")]
-        public string Customer_Id { get; set; }
-        public ApplicationUser customer { get; set; }
+        public string CustomerId { get; set; }
+        public ApplicationUser Customer { get; set; }
 
     }
 }

@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using WebApplication1.DTO;
+using WebApplication1.Dtos;
 using WebApplication1.Models;
 using WebApplication1.Repository;
 
@@ -11,28 +11,28 @@ namespace WebApplication1.Controllers
     [ApiController]
     public class CartController : ControllerBase
     {
-        private readonly UserManager<ApplicationUser> userManager;
-        private readonly ICartRepository cartRepository;
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly ICartRepository _cartRepository;
 
         public CartController(UserManager<ApplicationUser> userManager, ICartRepository cartRepository)
         {
-            this.userManager = userManager;
-            this.cartRepository = cartRepository;
+            this._userManager = userManager;
+            this._cartRepository = cartRepository;
         }
 
         [HttpGet]
         [Authorize]
         public ActionResult<GeneralResponse> GetAll()
         {
-            var cartsWithProductNames = cartRepository.GetAll()
+            var cartsWithProductNames = _cartRepository.GetAll()
                  .Select(cart => new
                  {
                      cart.Id,
                      cart.Quantity,
-                     cart.Product_Id,
-                     CustomerName = cart.customer.UserName,
-                     CustomerEmail = cart.customer.Email,
-                     ProductNames = cart.product.Name
+                     Product_Id = cart.ProductId,
+                     CustomerName = cart.Customer.UserName,
+                     CustomerEmail = cart.Customer.Email,
+                     ProductNames = cart.Product.Name
                  })
                  .ToList();
 
@@ -48,9 +48,9 @@ namespace WebApplication1.Controllers
 
         [HttpPost]
         [Authorize]
-        public async Task<ActionResult<GeneralResponse>> AddToCart(CartDTO cartDTO)
+        public async Task<ActionResult<GeneralResponse>> AddToCart(CartDto cartDto)
         {
-            var currentUser = await userManager.GetUserAsync(User);
+            var currentUser = await _userManager.GetUserAsync(User);
             if (currentUser == null)
             {
                 return Unauthorized("User not authenticated.");
@@ -60,13 +60,13 @@ namespace WebApplication1.Controllers
                 //var currentUser = await userManager.GetUserAsync(User);
                 var cart = new Cart
                 {
-                    Quantity = cartDTO.Quantity,
-                    Product_Id = cartDTO.Product_Id,
-                    Customer_Id = currentUser.Id,
+                    Quantity = cartDto.Quantity,
+                    ProductId = cartDto.ProductId,
+                    CustomerId = currentUser.Id,
 
                 };
-                cartRepository.Insert(cart);
-                cartRepository.Save();
+                _cartRepository.Insert(cart);
+                _cartRepository.Save();
                 GeneralResponse response = new GeneralResponse()
                 {
                     IsPass = true,
@@ -86,21 +86,21 @@ namespace WebApplication1.Controllers
         }
         [HttpPut]
         [Authorize]
-        public ActionResult<GeneralResponse> Edit(int id, CartDTO updatedCart)
+        public ActionResult<GeneralResponse> Edit(int id, CartDto updatedCart)
         {
-            Cart OldCart = cartRepository.GetById(id);
-            if (OldCart == null)
+            Cart oldCart = _cartRepository.GetById(id);
+            if (oldCart == null)
             {
                 return NotFound();
             }
-            OldCart.Quantity = updatedCart.Quantity;
-            OldCart.Product_Id = updatedCart.Product_Id;
+            oldCart.Quantity = updatedCart.Quantity;
+            oldCart.ProductId = updatedCart.ProductId;
 
 
 
 
-            cartRepository.Update(OldCart);
-            cartRepository.Save();
+            _cartRepository.Update(oldCart);
+            _cartRepository.Save();
             GeneralResponse response = new GeneralResponse()
             {
                 IsPass = true,
@@ -117,8 +117,8 @@ namespace WebApplication1.Controllers
         {
             try
             {
-                cartRepository.Delete(id);
-                cartRepository.Save();
+                _cartRepository.Delete(id);
+                _cartRepository.Save();
                 GeneralResponse localresponse = new GeneralResponse()
                 {
                     IsPass = true,

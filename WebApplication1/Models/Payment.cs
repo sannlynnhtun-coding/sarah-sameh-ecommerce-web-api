@@ -11,8 +11,8 @@ namespace WebApplication1.Models
         public bool IsDeleted { get; set; } = false;
 
         [ForeignKey("customer")]
-        public string Customer_Id { get; set; }
-        public ApplicationUser customer { get; set; }
+        public string CustomerId { get; set; }
+        public ApplicationUser Customer { get; set; }
 
     }
 }

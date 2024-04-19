@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using WebApplication1.DTO;
+using WebApplication1.Dtos;
 using WebApplication1.Models;
 using WebApplication1.Repository;
 
@@ -10,24 +10,24 @@ namespace WebApplication1.Controllers
     [ApiController]
     public class CategoryController : ControllerBase
     {
-        private readonly ICategoryRepository categoryRepository;
+        private readonly ICategoryRepository _categoryRepository;
 
         public CategoryController(ICategoryRepository categoryRepository)
         {
-            this.categoryRepository = categoryRepository;
+            this._categoryRepository = categoryRepository;
         }
 
         [HttpGet]
         [Authorize]
         public ActionResult<GeneralResponse> GetAllCategory()
         {
-            List<Category> categories = categoryRepository.GetAll();
+            List<Category> categories = _categoryRepository.GetAll();
             List<CategoryWithProduct> categoriesWithProduct = categories.Select(category =>
                 new CategoryWithProduct
                 {
                     Id = category.Id,
-                    Category_Name = category.Name,
-                    ProductNames = category.products?.Select(p => p.Name).ToList()
+                    CategoryName = category.Name,
+                    ProductNames = category.Products?.Select(p => p.Name).ToList()
                 }).ToList();
             //return Ok(categoriesWithProduct);
             GeneralResponse response = new GeneralResponse()
@@ -42,24 +42,24 @@ namespace WebApplication1.Controllers
         [Authorize]
         public ActionResult<GeneralResponse> GetById(int id)
         {
-            var category = categoryRepository.GetById(id);
+            var category = _categoryRepository.GetById(id);
 
             if (category == null)
             {
                 // return NotFound();
-                GeneralResponse LocalResponse = new GeneralResponse()
+                GeneralResponse localResponse = new GeneralResponse()
                 {
                     IsPass = false,
                     Message = "Not Found"
                 };
-                return LocalResponse;
+                return localResponse;
             }
 
             var categoryWithProducts = new CategoryWithProduct
             {
                 Id = category.Id,
-                Category_Name = category.Name,
-                ProductNames = category.products.Select(p => p.Name).ToList()
+                CategoryName = category.Name,
+                ProductNames = category.Products.Select(p => p.Name).ToList()
             };
 
 
@@ -74,17 +74,17 @@ namespace WebApplication1.Controllers
 
         [HttpPost]
         [Authorize]
-        public ActionResult<GeneralResponse> AppCategory(CatDTO catDTO)
+        public ActionResult<GeneralResponse> AppCategory(CatDto catDto)
         {
             if (ModelState.IsValid == true)
             {
                 var category = new Category
                 {
-                    Name = catDTO.Name
+                    Name = catDto.Name
                     //  products = catDTO.ProductNames.Select(name => new Product { Name = name }).ToList()
                 };
-                categoryRepository.Insert(category);
-                categoryRepository.Save();
+                _categoryRepository.Insert(category);
+                _categoryRepository.Save();
                 // return CreatedAtAction(nameof(GetById), new { id = category.Id }, category);
                 return new GeneralResponse
                 {
@@ -112,30 +112,30 @@ namespace WebApplication1.Controllers
 
         [HttpPut]
         [Authorize]
-        public ActionResult<GeneralResponse> Edit(int id, CatDTO UpdatedCategory)
+        public ActionResult<GeneralResponse> Edit(int id, CatDto updatedCategory)
         {
-            Category OldCategory = categoryRepository.GetById(id);
-            if (OldCategory == null)
+            Category oldCategory = _categoryRepository.GetById(id);
+            if (oldCategory == null)
             {
                 // return NotFound();
-                GeneralResponse LocalResponse = new GeneralResponse()
+                GeneralResponse localResponse = new GeneralResponse()
                 {
                     IsPass = false,
                     Message = "Not Found"
                 };
-                return LocalResponse;
+                return localResponse;
             }
-            OldCategory.Name = UpdatedCategory.Name;
-            categoryRepository.Update(OldCategory);
-            categoryRepository.Save();
+            oldCategory.Name = updatedCategory.Name;
+            _categoryRepository.Update(oldCategory);
+            _categoryRepository.Save();
 
             GeneralResponse response = new GeneralResponse()
             {
                 IsPass = true,
                 Message = new
                 {
-                    OldCategory.Id,
-                    OldCategory.Name,
+                    oldCategory.Id,
+                    oldCategory.Name,
 
                 }
             };
@@ -150,8 +150,8 @@ namespace WebApplication1.Controllers
         {
             try
             {
-                categoryRepository.Delete(id);
-                categoryRepository.Save();
+                _categoryRepository.Delete(id);
+                _categoryRepository.Save();
                 GeneralResponse localresponse = new GeneralResponse()
                 {
                     IsPass = true,

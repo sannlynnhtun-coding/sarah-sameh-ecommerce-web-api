@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using WebApplication1.DTO;
+using WebApplication1.Dtos;
 using WebApplication1.Models;
 using WebApplication1.Repository;
 
@@ -10,32 +10,32 @@ namespace WebApplication1.Controllers
     [ApiController]
     public class ProductController : ControllerBase
     {
-        private readonly IProductRepository productRepository;
+        private readonly IProductRepository _productRepository;
 
 
         public ProductController(IProductRepository productRepository)
         {
-            this.productRepository = productRepository;
+            this._productRepository = productRepository;
         }
 
         [HttpGet]
         [Authorize]
         public ActionResult<GeneralResponse> GetAll()
         {
-            List<Product> products = productRepository.GetAll();
-            List<ProductDTO> productDTOs = products.Select(product => new ProductDTO
+            List<Product> products = _productRepository.GetAll();
+            List<ProductDto> productDtOs = products.Select(product => new ProductDto
             {
                 Id = product.Id,
                 Name = product.Name,
                 Price = product.Price,
                 Description = product.Description,
-                Category_Id = product.Category_Id,
+                CategoryId = product.CategoryId,
 
             }).ToList();
             GeneralResponse response = new GeneralResponse()
             {
                 IsPass = true,
-                Message = productDTOs
+                Message = productDtOs
             };
             return response;
 
@@ -46,7 +46,7 @@ namespace WebApplication1.Controllers
         [Authorize]
         public ActionResult<GeneralResponse> GetById(int id)
         {
-            Product product = productRepository.GetById(id);
+            Product product = _productRepository.GetById(id);
 
             if (product == null)
             {
@@ -57,13 +57,13 @@ namespace WebApplication1.Controllers
                 };
                 return localresponse;
             }
-            var productDTo = new ProductDTO
+            var productDTo = new ProductDto
             {
                 Id = product.Id,
                 Name = product.Name,
                 Price = product.Price,
                 Description = product.Description,
-                Category_Id = product.Category_Id
+                CategoryId = product.CategoryId
 
             };
 
@@ -81,19 +81,19 @@ namespace WebApplication1.Controllers
 
         [HttpPost]
         [Authorize]
-        public ActionResult<GeneralResponse> AddProduct(ProductDTO newProductDTO)
+        public ActionResult<GeneralResponse> AddProduct(ProductDto newProductDto)
         {
             if (ModelState.IsValid == true)
             {
                 var newProduct = new Product
                 {
-                    Name = newProductDTO.Name,
-                    Price = newProductDTO.Price,
-                    Description = newProductDTO.Description,
-                    Category_Id = newProductDTO.Category_Id,
+                    Name = newProductDto.Name,
+                    Price = newProductDto.Price,
+                    Description = newProductDto.Description,
+                    CategoryId = newProductDto.CategoryId,
                 };
-                productRepository.Insert(newProduct);
-                productRepository.Save();
+                _productRepository.Insert(newProduct);
+                _productRepository.Save();
 
 
                 return new GeneralResponse
@@ -122,11 +122,11 @@ namespace WebApplication1.Controllers
 
         [HttpPut]
         [Authorize]
-        public ActionResult<GeneralResponse> Edit(int id, ProductDTO updatedProduct)
+        public ActionResult<GeneralResponse> Edit(int id, ProductDto updatedProduct)
         {
-            Product Oldproduct = productRepository.GetById(id);
+            Product oldproduct = _productRepository.GetById(id);
 
-            if (Oldproduct == null)
+            if (oldproduct == null)
             {
 
                 GeneralResponse localresponse = new GeneralResponse()
@@ -137,21 +137,21 @@ namespace WebApplication1.Controllers
                 return localresponse;
             }
 
-            Oldproduct.Name = updatedProduct.Name;
-            Oldproduct.Price = updatedProduct.Price;
-            Oldproduct.Description = updatedProduct.Description;
-            Oldproduct.Category_Id = updatedProduct.Category_Id;
-            productRepository.Update(Oldproduct);
-            productRepository.Save();
+            oldproduct.Name = updatedProduct.Name;
+            oldproduct.Price = updatedProduct.Price;
+            oldproduct.Description = updatedProduct.Description;
+            oldproduct.CategoryId = updatedProduct.CategoryId;
+            _productRepository.Update(oldproduct);
+            _productRepository.Save();
             GeneralResponse response = new GeneralResponse()
             {
                 IsPass = true,
                 Message = new
                 {
-                    Oldproduct.Id,
-                    Oldproduct.Name,
-                    Oldproduct.Price,
-                    Oldproduct.Description
+                    oldproduct.Id,
+                    oldproduct.Name,
+                    oldproduct.Price,
+                    oldproduct.Description
                 }
             };
             return response;
@@ -166,8 +166,8 @@ namespace WebApplication1.Controllers
         {
             try
             {
-                productRepository.Delete(id);
-                productRepository.Save();
+                _productRepository.Delete(id);
+                _productRepository.Save();
                 GeneralResponse localresponse = new GeneralResponse()
                 {
                     IsPass = true,

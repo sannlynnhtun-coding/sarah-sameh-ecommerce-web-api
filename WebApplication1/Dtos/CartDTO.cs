@@ -1,10 +1,10 @@
-﻿namespace WebApplication1.DTO
+﻿namespace WebApplication1.Dtos
 {
-    public class CartDTO
+    public class CartDto
     {
         public int Id { get; set; }
         public int Quantity { get; set; }
-        public int Product_Id { get; set; }
+        public int ProductId { get; set; }
         // public List<string> ProductNames { get; set; }
 
     }

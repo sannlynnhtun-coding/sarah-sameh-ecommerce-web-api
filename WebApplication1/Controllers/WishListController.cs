@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using WebApplication1.DTO;
+using WebApplication1.Dtos;
 using WebApplication1.Models;
 using WebApplication1.Repository;
 
@@ -11,13 +11,13 @@ namespace WebApplication1.Controllers
     [ApiController]
     public class WishListController : ControllerBase
     {
-        private readonly UserManager<ApplicationUser> userManager;
-        private readonly IWishListRepository wishListRepository;
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IWishListRepository _wishListRepository;
 
         public WishListController(UserManager<ApplicationUser> userManager, IWishListRepository wishListRepository)
         {
-            this.userManager = userManager;
-            this.wishListRepository = wishListRepository;
+            this._userManager = userManager;
+            this._wishListRepository = wishListRepository;
         }
 
 
@@ -26,18 +26,18 @@ namespace WebApplication1.Controllers
         public ActionResult<GeneralResponse> GetAll()
         {
 
-            var wishListWithUserNames = wishListRepository.GetAll()
+            var wishListWithUserNames = _wishListRepository.GetAll()
 
             .Select(wishList => new
             {
                 wishList.Id,
-                wishList.Product_Id,
-                wishList.product.Name,
-                wishList.product.Price,
-                wishList.product.Description,
+                Product_Id = wishList.ProductId,
+                wishList.Product.Name,
+                wishList.Product.Price,
+                wishList.Product.Description,
 
-                CustomerName = wishList.customer.UserName,
-                CustomerEmail = wishList.customer.Email
+                CustomerName = wishList.Customer.UserName,
+                CustomerEmail = wishList.Customer.Email
             })
             .ToList();
 
@@ -54,7 +54,7 @@ namespace WebApplication1.Controllers
         [Authorize]
         public ActionResult<GeneralResponse> GetById(int id)
         {
-            var wishList = wishListRepository.GetById(id);
+            var wishList = _wishListRepository.GetById(id);
 
             if (wishList == null)
             {
@@ -62,15 +62,15 @@ namespace WebApplication1.Controllers
             }
 
 
-            var WishListWithProducts = new
+            var wishListWithProducts = new
             {
                 wishList.Id,
-                wishList.Product_Id,
-                wishList.product.Name,
-                wishList.product.Price,
-                wishList.product.Description,
-                CustomerName = wishList.customer.UserName,
-                CustomerEmail = wishList.customer.Email
+                Product_Id = wishList.ProductId,
+                wishList.Product.Name,
+                wishList.Product.Price,
+                wishList.Product.Description,
+                CustomerName = wishList.Customer.UserName,
+                CustomerEmail = wishList.Customer.Email
             };
 
 
@@ -78,7 +78,7 @@ namespace WebApplication1.Controllers
             GeneralResponse response = new GeneralResponse()
             {
                 IsPass = true,
-                Message = WishListWithProducts
+                Message = wishListWithProducts
             };
             return response;
         }
@@ -88,19 +88,19 @@ namespace WebApplication1.Controllers
         [Authorize]
         public ActionResult<GeneralResponse> GetAllByUserName(string username)
         {
-            var user = userManager.FindByNameAsync(username).Result;
+            var user = _userManager.FindByNameAsync(username).Result;
             if (user == null)
             {
                 return NotFound($"User '{username}' not found.");
             }
-            var wishLists = wishListRepository.GetAll()
-                .Where(wishList => wishList.customer.UserName == username)
-                .Select(wishList => new WishListDTOs
+            var wishLists = _wishListRepository.GetAll()
+                .Where(wishList => wishList.Customer.UserName == username)
+                .Select(wishList => new WishListDtOs
                 {
-                    CustomerId = wishList.Customer_Id,
-                    ProductName = wishList.product.Name,
-                    ProductId = wishList.product.Id,
-                    Price = wishList.product.Price
+                    CustomerId = wishList.CustomerId,
+                    ProductName = wishList.Product.Name,
+                    ProductId = wishList.Product.Id,
+                    Price = wishList.Product.Price
                 })
                 .ToList();
 
@@ -116,9 +116,9 @@ namespace WebApplication1.Controllers
 
         [HttpPost]
         [Authorize]
-        public async Task<ActionResult<GeneralResponse>> AddToWishList(WishListDTO wishListDTO)
+        public async Task<ActionResult<GeneralResponse>> AddToWishList(WishListDto wishListDto)
         {
-            var currentUser = await userManager.GetUserAsync(User);
+            var currentUser = await _userManager.GetUserAsync(User);
             if (currentUser == null)
             {
                 return Unauthorized("User not authenticated.");
@@ -128,15 +128,15 @@ namespace WebApplication1.Controllers
                 //var currentUser = await userManager.GetUserAsync(User);
                 var wishList = new WishList
                 {
-                    Id = wishListDTO.Id,
-                    Customer_Id = currentUser.Id,
+                    Id = wishListDto.Id,
+                    CustomerId = currentUser.Id,
 
-                    Product_Id = wishListDTO.Product_Id,
+                    ProductId = wishListDto.ProductId,
 
 
                 };
-                wishListRepository.Insert(wishList);
-                wishListRepository.Save();
+                _wishListRepository.Insert(wishList);
+                _wishListRepository.Save();
                 //  return Ok();
                 return new GeneralResponse
                 {
@@ -159,27 +159,27 @@ namespace WebApplication1.Controllers
 
         [HttpPut]
         [Authorize]
-        public ActionResult<GeneralResponse> Edit(int id, WishListDTO updatedWishList)
+        public ActionResult<GeneralResponse> Edit(int id, WishListDto updatedWishList)
         {
-            WishList OldWishList = wishListRepository.GetById(id);
-            if (OldWishList == null)
+            WishList oldWishList = _wishListRepository.GetById(id);
+            if (oldWishList == null)
             {
                 //  return NotFound();
-                GeneralResponse LocalResponse = new GeneralResponse()
+                GeneralResponse localResponse = new GeneralResponse()
                 {
                     IsPass = false,
                     Message = "Not Found"
                 };
-                return LocalResponse;
+                return localResponse;
             }
-            OldWishList.Product_Id = updatedWishList.Product_Id;
+            oldWishList.ProductId = updatedWishList.ProductId;
 
 
 
 
 
-            wishListRepository.Update(OldWishList);
-            wishListRepository.Save();
+            _wishListRepository.Update(oldWishList);
+            _wishListRepository.Save();
             //return NoContent();
             GeneralResponse response = new GeneralResponse()
             {
@@ -197,8 +197,8 @@ namespace WebApplication1.Controllers
         {
             try
             {
-                wishListRepository.Delete(id);
-                wishListRepository.Save();
+                _wishListRepository.Delete(id);
+                _wishListRepository.Save();
                 //return NoContent();
                 GeneralResponse localresponse = new GeneralResponse()
                 {

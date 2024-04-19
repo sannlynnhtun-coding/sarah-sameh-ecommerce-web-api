@@ -5,44 +5,44 @@ namespace WebApplication1.Repository
 {
     public class ProductRepository : IProductRepository
     {
-        Context context;
+        Context _context;
 
         // inject Context
-        public ProductRepository(Context _context)//ask context not create 
+        public ProductRepository(Context context)//ask context not create 
         {
-            context = _context;
+            this._context = context;
         }
         public List<Product> GetAll()
         {
-            return context.products
-                .Include(p => p.category)
+            return _context.Products
+                .Include(p => p.Category)
                 .ToList();
         }
 
         public Product GetById(int id)
         {
-            return context.products
-                .Include(p => p.category)
+            return _context.Products
+                .Include(p => p.Category)
                 .FirstOrDefault(p => p.Id == id);
         }
         public void Insert(Product obj)
         {
-            context.Add(obj);
+            _context.Add(obj);
         }
         public void Update(Product obj)
         {
-            context.Update(obj);
+            _context.Update(obj);
         }
 
         public void Delete(int id)
         {
             Product crs = GetById(id);
-            context.Remove(crs);
+            _context.Remove(crs);
         }
 
         public void Save()
         {
-            context.SaveChanges();
+            _context.SaveChanges();
         }
     }
 }

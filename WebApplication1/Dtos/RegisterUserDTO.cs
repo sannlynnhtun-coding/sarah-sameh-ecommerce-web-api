@@ -1,4 +1,4 @@
-﻿namespace WebApplication1.DTO
+﻿namespace WebApplication1.Dtos
 {
     public class RegisterUserDto
     {

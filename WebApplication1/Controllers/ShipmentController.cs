@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using WebApplication1.DTO;
+using WebApplication1.Dtos;
 using WebApplication1.Models;
 using WebApplication1.Repository;
 
@@ -11,19 +11,19 @@ namespace WebApplication1.Controllers
     [ApiController]
     public class ShipmentController : ControllerBase
     {
-        private readonly UserManager<ApplicationUser> userManager;
-        private readonly IShipmentRepository shipmentRepository;
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IShipmentRepository _shipmentRepository;
 
         public ShipmentController(UserManager<ApplicationUser> userManager, IShipmentRepository shipmentRepository)
         {
-            this.userManager = userManager;
-            this.shipmentRepository = shipmentRepository;
+            this._userManager = userManager;
+            this._shipmentRepository = shipmentRepository;
         }
         [HttpGet]
         [Authorize]
         public ActionResult<GeneralResponse> GetAll()
         {
-            var shipmentsWithUserNames = shipmentRepository.GetAll()
+            var shipmentsWithUserNames = _shipmentRepository.GetAll()
                 .Select(shipment => new
                 {
                     shipment.Id,
@@ -31,10 +31,10 @@ namespace WebApplication1.Controllers
                     shipment.Address,
                     shipment.State,
                     shipment.City,
-                    shipment.Zip_Code,
+                    Zip_Code = shipment.ZipCode,
                     shipment.Country,
-                    CustomerName = shipment.customer.UserName,
-                    CustomerEmail = shipment.customer.Email
+                    CustomerName = shipment.Customer.UserName,
+                    CustomerEmail = shipment.Customer.Email
                 })
                 .ToList();
 
@@ -52,13 +52,13 @@ namespace WebApplication1.Controllers
         [Authorize]
         public ActionResult<GeneralResponse> GetAllByUserName(string username)
         {
-            var user = userManager.FindByNameAsync(username).Result;
+            var user = _userManager.FindByNameAsync(username).Result;
             if (user == null)
             {
                 return NotFound($"User '{username}' not found.");
             }
-            var shipmentsWithUserNames = shipmentRepository.GetAll()
-            .Where(shipment => shipment.customer.UserName == username)
+            var shipmentsWithUserNames = _shipmentRepository.GetAll()
+            .Where(shipment => shipment.Customer.UserName == username)
             .Select(shipment => new
             {
                 shipment.Id,
@@ -66,10 +66,10 @@ namespace WebApplication1.Controllers
                 shipment.Address,
                 shipment.State,
                 shipment.City,
-                shipment.Zip_Code,
+                Zip_Code = shipment.ZipCode,
                 shipment.Country,
-                CustomerName = shipment.customer.UserName,
-                CustomerEmail = shipment.customer.Email
+                CustomerName = shipment.Customer.UserName,
+                CustomerEmail = shipment.Customer.Email
             })
             .ToList();
 
@@ -85,9 +85,9 @@ namespace WebApplication1.Controllers
 
         [HttpPost]
         [Authorize]
-        public async Task<ActionResult<GeneralResponse>> AddShipment(ShipmentDTO shipmentDTO)
+        public async Task<ActionResult<GeneralResponse>> AddShipment(ShipmentDto shipmentDto)
         {
-            var currentUser = await userManager.GetUserAsync(User);
+            var currentUser = await _userManager.GetUserAsync(User);
             if (currentUser == null)
             {
                 return Unauthorized("User not authenticated.");
@@ -98,20 +98,20 @@ namespace WebApplication1.Controllers
 
                 var shipment = new Shipment
                 {
-                    Date = shipmentDTO.Date,
-                    Address = shipmentDTO.Address,
-                    State = shipmentDTO.State,
-                    City = shipmentDTO.City,
-                    Zip_Code = shipmentDTO.Zip_Code,
-                    Country = shipmentDTO.Country,
-                    customer = currentUser,
-                    Customer_Id = currentUser.Id
+                    Date = shipmentDto.Date,
+                    Address = shipmentDto.Address,
+                    State = shipmentDto.State,
+                    City = shipmentDto.City,
+                    ZipCode = shipmentDto.ZipCode,
+                    Country = shipmentDto.Country,
+                    Customer = currentUser,
+                    CustomerId = currentUser.Id
 
 
                 };
 
-                shipmentRepository.Insert(shipment);
-                shipmentRepository.Save();
+                _shipmentRepository.Insert(shipment);
+                _shipmentRepository.Save();
                 //   return Ok();
                 return new GeneralResponse
                 {
@@ -124,7 +124,7 @@ namespace WebApplication1.Controllers
                         shipment.City,
                         shipment.Country,
                         shipment.State,
-                        shipment.Zip_Code
+                        Zip_Code = shipment.ZipCode
 
                     }
                 };
@@ -142,43 +142,43 @@ namespace WebApplication1.Controllers
 
         [HttpPut]
         [Authorize]
-        public ActionResult<GeneralResponse> Edit(int id, ShipmentDTO updatedShipment)
+        public ActionResult<GeneralResponse> Edit(int id, ShipmentDto updatedShipment)
         {
-            Shipment OldShipment = shipmentRepository.GetById(id);
-            if (OldShipment == null)
+            Shipment oldShipment = _shipmentRepository.GetById(id);
+            if (oldShipment == null)
             {
                 // return NotFound();
-                GeneralResponse LocalResponse = new GeneralResponse()
+                GeneralResponse localResponse = new GeneralResponse()
                 {
                     IsPass = false,
                     Message = "Not Found"
                 };
-                return LocalResponse;
+                return localResponse;
             }
-            OldShipment.Address = updatedShipment.Address;
-            OldShipment.Date = updatedShipment.Date;
-            OldShipment.Country = updatedShipment.Country;
-            OldShipment.City = updatedShipment.City;
-            OldShipment.State = updatedShipment.State;
-            OldShipment.Zip_Code = updatedShipment.Zip_Code;
+            oldShipment.Address = updatedShipment.Address;
+            oldShipment.Date = updatedShipment.Date;
+            oldShipment.Country = updatedShipment.Country;
+            oldShipment.City = updatedShipment.City;
+            oldShipment.State = updatedShipment.State;
+            oldShipment.ZipCode = updatedShipment.ZipCode;
 
 
 
-            shipmentRepository.Update(OldShipment);
-            shipmentRepository.Save();
+            _shipmentRepository.Update(oldShipment);
+            _shipmentRepository.Save();
             // return NoContent();
             GeneralResponse response = new GeneralResponse()
             {
                 IsPass = true,
                 Message = new
                 {
-                    OldShipment.Id,
-                    OldShipment.Date,
-                    OldShipment.Address,
-                    OldShipment.City,
-                    OldShipment.Country,
-                    OldShipment.State,
-                    OldShipment.Zip_Code
+                    oldShipment.Id,
+                    oldShipment.Date,
+                    oldShipment.Address,
+                    oldShipment.City,
+                    oldShipment.Country,
+                    oldShipment.State,
+                    Zip_Code = oldShipment.ZipCode
 
                 }
             };
@@ -193,8 +193,8 @@ namespace WebApplication1.Controllers
         {
             try
             {
-                shipmentRepository.Delete(id);
-                shipmentRepository.Save();
+                _shipmentRepository.Delete(id);
+                _shipmentRepository.Save();
                 // return NoContent();
                 GeneralResponse localresponse = new GeneralResponse()
                 {

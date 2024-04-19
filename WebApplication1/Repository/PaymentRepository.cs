@@ -5,42 +5,42 @@ namespace WebApplication1.Repository
 {
     public class PaymentRepository : IPaymentRepository
     {
-        Context context;
+        Context _context;
 
         // inject Context
-        public PaymentRepository(Context _context)//ask context not create 
+        public PaymentRepository(Context context)//ask context not create 
         {
-            context = _context;
+            this._context = context;
         }
         public List<Payment> GetAll()
         {
-            return context.payments.Include(c => c.customer).ToList();
+            return _context.Payments.Include(c => c.Customer).ToList();
         }
 
         public Payment GetById(int id)
         {
-            return context.payments
-                 .Include(c => c.customer)
+            return _context.Payments
+                 .Include(c => c.Customer)
                 .FirstOrDefault(p => p.Id == id);
         }
         public void Insert(Payment obj)
         {
-            context.Add(obj);
+            _context.Add(obj);
         }
         public void Update(Payment obj)
         {
-            context.Update(obj);
+            _context.Update(obj);
         }
 
         public void Delete(int id)
         {
             Payment crs = GetById(id);
-            context.Remove(crs);
+            _context.Remove(crs);
         }
 
         public void Save()
         {
-            context.SaveChanges();
+            _context.SaveChanges();
         }
     }
 }

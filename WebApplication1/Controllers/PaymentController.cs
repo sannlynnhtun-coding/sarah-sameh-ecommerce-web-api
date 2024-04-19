@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
-using WebApplication1.DTO;
+using WebApplication1.Dtos;
 using WebApplication1.Models;
 using WebApplication1.Repository;
 
@@ -12,30 +12,30 @@ namespace WebApplication1.Controllers
     [ApiController]
     public class PaymentController : ControllerBase
     {
-        private readonly UserManager<ApplicationUser> userManager;
-        private readonly IPaymentRepository paymentRepository;
-        private readonly ICartRepository cartRepository;
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IPaymentRepository _paymentRepository;
+        private readonly ICartRepository _cartRepository;
 
         public PaymentController(UserManager<ApplicationUser> userManager, IPaymentRepository paymentRepository, ICartRepository cartRepository)
         {
-            this.userManager = userManager;
-            this.paymentRepository = paymentRepository;
-            this.cartRepository = cartRepository;
+            this._userManager = userManager;
+            this._paymentRepository = paymentRepository;
+            this._cartRepository = cartRepository;
         }
 
         [HttpGet]
         [Authorize]
         public ActionResult<GeneralResponse> GetAllPayment()
         {
-            var paymentsWithUserNames = paymentRepository.GetAll()
+            var paymentsWithUserNames = _paymentRepository.GetAll()
               .Select(payment => new
               {
                   payment.Id,
                   payment.Date,
                   payment.Method,
                   payment.Amount,
-                  CustomerName = payment.customer.UserName,
-                  CustomerEmail = payment.customer.Email
+                  CustomerName = payment.Customer.UserName,
+                  CustomerEmail = payment.Customer.Email
               })
               .ToList();
 
@@ -52,13 +52,13 @@ namespace WebApplication1.Controllers
         [Authorize]
         public ActionResult<GeneralResponse> GetAllByUserName(string username)
         {
-            var user = userManager.FindByNameAsync(username).Result;
+            var user = _userManager.FindByNameAsync(username).Result;
             if (user == null)
             {
                 return NotFound($"User '{username}' not found.");
             }
-            var paymentsWithUserNames = paymentRepository.GetAll()
-            .Where(payment => payment.customer.UserName == username)
+            var paymentsWithUserNames = _paymentRepository.GetAll()
+            .Where(payment => payment.Customer.UserName == username)
             .Select(payment => new
             {
                 payment.Id,
@@ -66,8 +66,8 @@ namespace WebApplication1.Controllers
                 payment.Method,
                 payment.Amount,
 
-                CustomerName = payment.customer.UserName,
-                CustomerEmail = payment.customer.Email
+                CustomerName = payment.Customer.UserName,
+                CustomerEmail = payment.Customer.Email
             })
             .ToList();
 
@@ -84,9 +84,9 @@ namespace WebApplication1.Controllers
 
         [HttpPost]
         [Authorize]
-        public async Task<ActionResult<GeneralResponse>> AddPayment(PaymentDTO paymentDTO)
+        public async Task<ActionResult<GeneralResponse>> AddPayment(PaymentDto paymentDto)
         {
-            var currentUser = await userManager.GetUserAsync(User);
+            var currentUser = await _userManager.GetUserAsync(User);
             if (currentUser == null)
             {
                 return Unauthorized("User not authenticated.");
@@ -94,19 +94,19 @@ namespace WebApplication1.Controllers
             if (ModelState.IsValid)
             {
                 // var currentUser = await userManager.GetUserAsync(User);
-                var Id = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                var id = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
                 var payment = new Payment
                 {
-                    Date = paymentDTO.Date,
-                    Method = paymentDTO.Method,
-                    Amount = cartRepository.GetTotalPrice(Id),
-                    customer = currentUser,
-                    Customer_Id = currentUser.Id
+                    Date = paymentDto.Date,
+                    Method = paymentDto.Method,
+                    Amount = _cartRepository.GetTotalPrice(id),
+                    Customer = currentUser,
+                    CustomerId = currentUser.Id
                 };
 
-                paymentRepository.Insert(payment);
-                paymentRepository.Save();
+                _paymentRepository.Insert(payment);
+                _paymentRepository.Save();
                 // return Ok();
                 return new GeneralResponse
                 {
@@ -133,35 +133,35 @@ namespace WebApplication1.Controllers
 
         [HttpPut]
         [Authorize]
-        public ActionResult<GeneralResponse> Edit(int id, PaymentDTO updatedPayment)
+        public ActionResult<GeneralResponse> Edit(int id, PaymentDto updatedPayment)
         {
-            Payment OldPayment = paymentRepository.GetById(id);
-            if (OldPayment == null)
+            Payment oldPayment = _paymentRepository.GetById(id);
+            if (oldPayment == null)
             {
-                GeneralResponse LocalResponse = new GeneralResponse()
+                GeneralResponse localResponse = new GeneralResponse()
                 {
                     IsPass = false,
                     Message = "Not Found"
                 };
-                return LocalResponse;
+                return localResponse;
             }
-            OldPayment.Date = updatedPayment.Date;
-            OldPayment.Method = updatedPayment.Method;
-            OldPayment.Amount = updatedPayment.Amount;
+            oldPayment.Date = updatedPayment.Date;
+            oldPayment.Method = updatedPayment.Method;
+            oldPayment.Amount = updatedPayment.Amount;
 
 
-            paymentRepository.Update(OldPayment);
-            paymentRepository.Save();
+            _paymentRepository.Update(oldPayment);
+            _paymentRepository.Save();
             // return NoContent();
             GeneralResponse response = new GeneralResponse()
             {
                 IsPass = true,
                 Message = new
                 {
-                    OldPayment.Id,
-                    OldPayment.Date,
-                    OldPayment.Method,
-                    OldPayment.Amount
+                    oldPayment.Id,
+                    oldPayment.Date,
+                    oldPayment.Method,
+                    oldPayment.Amount
 
                 }
             };
@@ -175,8 +175,8 @@ namespace WebApplication1.Controllers
         {
             try
             {
-                paymentRepository.Delete(id);
-                paymentRepository.Save();
+                _paymentRepository.Delete(id);
+                _paymentRepository.Save();
                 GeneralResponse localresponse = new GeneralResponse()
                 {
                     IsPass = true,

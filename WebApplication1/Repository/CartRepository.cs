@@ -5,40 +5,40 @@ namespace WebApplication1.Repository
 {
     public class CartRepository : ICartRepository
     {
-        Context context;
+        Context _context;
 
         // inject Context
-        public CartRepository(Context _context)//ask context not create 
+        public CartRepository(Context context)//ask context not create 
         {
-            context = _context;
+            this._context = context;
         }
         public List<Cart> GetAll()
         {
-            return context.carts
-                 .Include(c => c.product)
-                 .Include(c => c.customer)
+            return _context.Carts
+                 .Include(c => c.Product)
+                 .Include(c => c.Customer)
                  .Where(c => !c.IsDeleted)
                  .ToList();
         }
 
         public Cart GetById(int id)
         {
-            return context.carts
-                 .Include(c => c.product)
+            return _context.Carts
+                 .Include(c => c.Product)
                 .FirstOrDefault(c => c.Id == id && !c.IsDeleted);
         }
 
         public List<Cart> GetCartItemsOfCustomer(string customerId)
         {
 
-            return GetAll().Where(items => items.Customer_Id == customerId).ToList();
+            return GetAll().Where(items => items.CustomerId == customerId).ToList();
         }
         public int GetTotalPrice(string customerId)
         {
             int totalPrice = 0;
             foreach (Cart cartItem in GetCartItemsOfCustomer(customerId))
             {
-                totalPrice += (cartItem.product.Price * cartItem.Quantity);
+                totalPrice += (cartItem.Product.Price * cartItem.Quantity);
             }
 
             return totalPrice;
@@ -46,11 +46,11 @@ namespace WebApplication1.Repository
 
         public void Insert(Cart obj)
         {
-            context.Add(obj);
+            _context.Add(obj);
         }
         public void Update(Cart obj)
         {
-            context.Update(obj);
+            _context.Update(obj);
         }
 
         public void Delete(int id)
@@ -64,7 +64,7 @@ namespace WebApplication1.Repository
 
         public void Save()
         {
-            context.SaveChanges();
+            _context.SaveChanges();
         }
     }
 }
