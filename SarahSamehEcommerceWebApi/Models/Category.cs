@@ -1,10 +1,9 @@
-﻿namespace WebApplication1.Models
-{
-    public class Category
-    {
-        public int Id { get; set; }
-        public string Name { get; set; }
+﻿namespace SarahSamehEcommerceWebApi.Models;
 
-        public List<Product>? Products { get; set; }
-    }
+public class Category
+{
+    public int Id { get; set; }
+    public string Name { get; set; }
+
+    public List<Product>? Products { get; set; }
 }
